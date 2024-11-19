@@ -1,0 +1,33 @@
+# DIRECTORIES/PATHS
+data_dir: !PLACEHOLDER 
+models_dir: !PLACEHOLDER 
+results_dir: !PLACEHOLDER
+
+seed: 42
+__set_seeds: !apply:utils.general.set_seeds [!ref <seed>]
+device: 'cpu' 
+
+# DATA 
+dataset: !name:utils.dataset.ClimateDataset
+window_size: 10
+scaler: !new:sklearn.preprocessing.MinMaxScaler
+
+# TRAINING HPARS
+num_epochs: 50
+lr: 0.005 
+criterion: !name:torch.nn.MSELoss
+optimizer: !name:torch.optim.Adam
+  lr: !ref <lr>
+batch_size: 32
+
+# MODEL
+input_size: 1
+hidden_size: 50
+output_size: 1
+num_layers: 1
+
+model: !new:models.LSTM.LSTM
+  input_size: !ref <input_size>
+  hidden_size: !ref <hidden_size>
+  output_size: !ref <output_size>
+  num_layers: !ref <num_layers>

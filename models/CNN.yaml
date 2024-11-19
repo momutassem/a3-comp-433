@@ -1,0 +1,81 @@
+# DIRECTORIES/PATHS
+data_dir: !PLACEHOLDER 
+models_dir: !PLACEHOLDER
+results_dir: !PLACEHOLDER
+
+
+seed: 42
+__set_seeds: !apply:utils.general.set_seeds [!ref <seed>]
+device: !apply:utils.general.set_device
+
+# DATA
+dataset: !name:utils.dataset.FingersDataset
+image_size: 128
+mean: [0.5]
+std: [0.5]
+h_flip_p: 0.5
+rotate_deg: 15
+
+resize: !new:torchvision.transforms.v2.Resize
+  size: [!ref <image_size>, !ref <image_size>]
+h_flip: !new:torchvision.transforms.v2.RandomHorizontalFlip
+  p: !ref <h_flip_p>
+rotate: !new:torchvision.transforms.v2.RandomRotation
+  degrees: !ref <rotate_deg>
+tensor: !new:torchvision.transforms.v2.ToTensor
+normalize: !new:torchvision.transforms.v2.Normalize
+  mean: !ref <mean>
+  std: !ref <std>
+
+train_transform: !new:torchvision.transforms.v2.Compose
+  transforms: [
+    !ref <resize>,
+    !ref <h_flip>,
+    !ref <rotate>,
+    !ref <tensor>,
+    !ref <normalize>
+  ]
+
+val_transform: !new:torchvision.transforms.v2.Compose
+  transforms: [
+    !ref <resize>,
+    !ref <tensor>,
+    !ref <normalize>
+  ]
+
+# METRICS
+report: !name:sklearn.metrics.classification_report
+cm: !name:sklearn.metrics.confusion_matrix
+scores:
+  report: !ref <report>
+  cm: !ref <cm>
+
+# TRAINING HPARS
+num_epochs: 5 
+lr: 0.0005 
+criterion: !name:torch.nn.CrossEntropyLoss
+optimizer: !name:torch.optim.Adam
+  lr: !ref <lr>
+batch_size: 256 
+valid_ratio: 0.2 
+
+# CNN MODEL 
+input_shape: [null, null, !ref <image_size>, !ref <image_size>] 
+output_size: 6
+in_chans: 3
+out_chans: 4
+depth: 3
+kernel_sizes: [5, 7, 9]
+activation_type: !new:torch.nn.ReLU
+
+model: !new:models.CNN.CNN
+  input_shape: !ref <input_shape>
+  output_size: !ref <output_size>
+  in_chans: !ref <in_chans>
+  out_chans: !ref <out_chans>
+  depth: !ref <depth>
+  kernel_sizes: !ref <kernel_sizes>
+  activation_type: !ref <activation_type>
+
+# RESNET18 Model
+resnet_weights: !name:torchvision.models.ResNet18_Weights.IMAGENET1K_V1
